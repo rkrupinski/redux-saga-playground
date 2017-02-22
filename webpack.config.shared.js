@@ -5,7 +5,12 @@ const CleanWebpackPlugin = require('clean-webpack-plugin');
 module.exports = {
   entry: {
     main: path.resolve(__dirname, 'src', 'index.js'),
-    // vendor: [],
+    vendor: [
+      'regenerator-runtime/runtime',
+      'redux',
+      'redux-saga',
+      'redux-logger',
+    ],
   },
   output: {
     path: path.resolve(__dirname, 'build'),
@@ -34,7 +39,7 @@ module.exports = {
     new CleanWebpackPlugin(['build']),
     new webpack.optimize.CommonsChunkPlugin({
       names: [
-        // 'vendor',
+        'vendor',
         'manifest'
       ],
     }),
