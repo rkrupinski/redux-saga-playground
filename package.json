@@ -1,0 +1,26 @@
+{
+  "name": "redux-saga-playground",
+  "version": "0.0.0",
+  "description": "",
+  "scripts": {
+    "start": "webpack-dashboard -- webpack -w --config webpack.config.dev.js",
+    "build": "webpack --config webpack.config.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rkrupinski/redux-saga-playground.git"
+  },
+  "author": "Rafał Krupiński",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.23.1",
+    "babel-loader": "^6.3.2",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "babel-preset-env": "^1.1.8",
+    "clean-webpack-plugin": "^0.1.14",
+    "html-webpack-plugin": "^2.26.0",
+    "webpack": "^2.2.1",
+    "webpack-dashboard": "^0.2.1",
+    "webpack-merge": "^2.3.1"
+  }
+}
