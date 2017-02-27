@@ -1,14 +1,14 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import createLogger from 'redux-logger';
 import createSagaMiddleware, { delay } from 'redux-saga';
-import { put, takeEvery } from 'redux-saga/effects';
+import { call, put, take, select, fork, cancel, cancelled } from 'redux-saga/effects';
 
 const rootReducer = combineReducers({
   foo(state = false, { type }) {
-    console.log('from reducer', type);
     switch (type) {
       case 'ENABLE':
         return true;
+      case 'DISABLE':
+        return false;
       default:
         return state;
     }
@@ -19,28 +19,61 @@ const sagaMiddleware = createSagaMiddleware();
 
 const store = createStore(
   rootReducer,
-  applyMiddleware(
-    createLogger(),
-    sagaMiddleware
-  )
+  applyMiddleware(sagaMiddleware)
 );
 
-function* enableAsync() {
-  yield delay(1000);
-  yield put({ type: 'ENABLE'});
+store.subscribe(rocketScienceRenderingLogic);
+
+function rocketScienceRenderingLogic() {
+  const { foo } = store.getState();
+
+  document.querySelector('#app').innerHTML = foo ? '<h1>💩</h1>' : '';
 }
 
-function* watchEnableAsync() {
-  yield takeEvery('ENABLE_ASYNC', enableAsync);
+function* toggleAsyncInner() {
+  yield call(delay, 1000);
+  yield put({ type: 'ENABLE' });
+  yield call(delay, 1000);
+  yield put({ type: 'DISABLE' });
+}
+
+function* toggleAsync() {
+  try {
+    yield* toggleAsyncInner();
+  } finally {
+    console.log((yield cancelled()) ? 'cancelled' : 'done');
+  }
+}
+
+function* watchToggleAsync() {
+  let asyncTask;
+
+  while (yield take ('TOGGLE_ASYNC')) {
+    asyncTask && (yield cancel(asyncTask));
+
+    asyncTask = yield fork(toggleAsync);
+  }
+}
+
+function* logger() {
+  while (true) {
+    const { type } = yield take();
+    const foo = yield select(({ foo }) => foo);
+
+    if (type !== 'TOGGLE_ASYNC') {
+      console.log(type, foo);
+    }
+  }
 }
 
 function* rootSaga() {
   yield [
-    watchEnableAsync(),
+    watchToggleAsync(),
+    logger(),
   ];
 }
 
-window.addEventListener('click', () =>
-    store.dispatch({ type: 'ENABLE_ASYNC' }));
-
 sagaMiddleware.run(rootSaga);
+
+window.addEventListener('click', () =>
+    store.dispatch({ type: 'TOGGLE_ASYNC' }));

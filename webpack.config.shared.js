@@ -9,7 +9,6 @@ module.exports = {
       'regenerator-runtime/runtime',
       'redux',
       'redux-saga',
-      'redux-logger',
     ],
   },
   output: {
