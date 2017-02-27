@@ -58,12 +58,18 @@ function* toggleAsyncInner2() {
 }
 
 function* watchToggleAsync() {
-  let asyncTask;
+  try {
+    let asyncTask;
 
-  while (yield take ('TOGGLE_ASYNC')) {
-    asyncTask && (yield cancel(asyncTask));
+    while (yield take ('TOGGLE_ASYNC')) {
+      asyncTask && (yield cancel(asyncTask));
 
-    asyncTask = yield fork(toggleAsync);
+      asyncTask = yield fork(toggleAsync);
+    }
+  } finally {
+    if (yield cancelled()) {
+      console.log('Nope');
+    }
   }
 }
 
@@ -78,11 +84,20 @@ function* logger() {
   }
 }
 
+function* failRandomly() {
+  yield Promise[Math.random() > 0.5 ? 'resolve' : 'reject']({});
+}
+
 function* rootSaga() {
-  yield [
-    watchToggleAsync(),
-    logger(),
-  ];
+  try {
+    yield [
+      watchToggleAsync(),
+      logger(),
+      failRandomly(),
+    ];
+  } catch (err) {
+    console.log(err);
+  }
 }
 
 sagaMiddleware.run(rootSaga);
