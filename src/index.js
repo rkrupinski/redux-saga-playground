@@ -30,18 +30,30 @@ function rocketScienceRenderingLogic() {
   document.querySelector('#app').innerHTML = foo ? '<h1>💩</h1>' : '';
 }
 
-function* toggleAsyncInner() {
-  yield call(delay, 1000);
-  yield put({ type: 'ENABLE' });
-  yield call(delay, 1000);
-  yield put({ type: 'DISABLE' });
-}
-
 function* toggleAsync() {
   try {
-    yield* toggleAsyncInner();
+    yield* toggleAsyncInner1();
   } finally {
-    console.log((yield cancelled()) ? 'cancelled' : 'done');
+    console.log((yield cancelled()) ? 'cancelled' : 'done', 0);
+  }
+}
+
+function* toggleAsyncInner1() {
+  try {
+    yield call(delay, 1000);
+    yield put({ type: 'ENABLE' });
+    yield call(toggleAsyncInner2);
+  } finally {
+    console.log((yield cancelled()) ? 'cancelled' : 'done', 1);
+  }
+}
+
+function* toggleAsyncInner2() {
+  try {
+    yield call(delay, 1000);
+    yield put({ type: 'DISABLE' });
+  } finally {
+    console.log((yield cancelled()) ? 'cancelled' : 'done', 2);
   }
 }
 
